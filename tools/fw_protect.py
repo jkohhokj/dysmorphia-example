@@ -9,21 +9,32 @@ Firmware Bundle-and-Protect Tool
 """
 import argparse
 import struct
+from pwn import *
 
 
 def protect_firmware(infile, outfile, version, message):
     # Load firmware binary from infile
     with open(infile, 'rb') as fp:
         firmware = fp.read()
+    
 
     # Append null-terminated message to end of firmware
     firmware_and_message = firmware + message.encode() + b'\00'
+    
+    CHUNK_SIZE = 1
+    encrypted_firmware = b''
+    encrypted_chunk = b''
+    for c in range(0,len(firmware_and_message),CHUNK_SIZE):
+        encrypted_chunk += p8((u8(firmware_and_message[c:c+CHUNK_SIZE])+0x10)&0xFF)
+    encrypted_firmware += encrypted_chunk
+
+
 
     # Pack version and size into two little-endian shorts
     metadata = struct.pack('<HH', version, len(firmware))
 
     # Append firmware and message to metadata
-    firmware_blob = metadata + firmware_and_message
+    firmware_blob = metadata + encrypted_firmware
 
     # Write firmware blob to outfile
     with open(outfile, 'wb+') as outfile:
