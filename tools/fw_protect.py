@@ -21,12 +21,11 @@ def protect_firmware(infile, outfile, version, message):
     # Append null-terminated message to end of firmware
     firmware_and_message = firmware + message.encode() + b'\00'
     
-    CHUNK_SIZE = 1
     encrypted_firmware = b''
     encrypted_chunk = b''
-    for c in range(0,len(firmware_and_message),CHUNK_SIZE):
-        encrypted_chunk += p8((u8(firmware_and_message[c:c+CHUNK_SIZE])+0x10)&0xFF)
-    encrypted_firmware += encrypted_chunk
+    for c in range(len(firmware_and_message)):
+        encrypted_chunk = p8((firmware_and_message[c]+0x10)&0xFF)
+        encrypted_firmware += encrypted_chunk
 
 
 

@@ -224,7 +224,7 @@ void load_firmware(void){
 
         // Get the number of bytes specified
         for (int i = 0; i < frame_length; ++i){
-            data[data_index] = ((uint8_t)uart_read(UART1, BLOCKING, &read)-0x10)&0xFF;
+            data[data_index] = ((uint8_t)uart_read(UART1, BLOCKING, &read)-0x10+0x100)&0xFF;
             data_index += 1;
         }
 
@@ -322,12 +322,7 @@ void boot_firmware(void){
     // compute the release message address, and then print it
     uint16_t fw_size = *fw_size_address;
     fw_release_message_address = (uint8_t *)(FW_BASE + fw_size);
-    uart_write_str(UART2, "\n\n\n");
-    uart_write_str(UART2, (char *)fw_release_message_address);
-    uart_write_str(UART2, (char *) &fw_size);
-    uart_write_str(UART2, "\n\n\n");
-    uart_write_str(UART2, "There's a new thing here lol kekw!\n\n\n");
-    uart_write_str(UART2, (char *)fw_release_message_address);
+    uart_write_str(UART2, (char *) fw_release_message_address);
 
     // Boot the firmware
     __asm(
